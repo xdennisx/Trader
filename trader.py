@@ -12,7 +12,6 @@ from sklearn.svm import LinearSVC
 def load_data(file_name):
     column_names = ['open','high','low','close']
     df = pd.read_csv(file_name, header = None, names = column_names)
-    # print(df)
     return df
 
 def process(Data):
@@ -32,7 +31,7 @@ def process(Data):
     del(Data['close'])
     del(Data['high'])
     del(Data['low'])
-    return Data[:len(Data)-2], value
+    return Data[:len(value)], value
 
 def process_test(Data):
     Data['High-Low'] = Data['high'] - Data['low'] #today's High - Low
@@ -51,26 +50,16 @@ def process_test(Data):
 
 def Trader(train_x, train_y):
     X_train, X_test, y_train, y_test = cross_validation.train_test_split(train_x, train_y, test_size = 0.5, random_state = 0)
-    #print(y_train[0,:])
-    # clf = svm.SVR(kernel='rbf', C=1e3, gamma=0.1)
-    # svr = clf.fit(X_train, y_train)
-    # print(y_train)
     clf = svm.SVC(kernel='rbf', C=1).fit(X_train, y_train)
-    # clf = OneVsOneClassifier(LinearSVC(random_state=0)).fit(X_train, y_train)
     scores = cross_validation.cross_val_score(clf, X_train, y_train, cv=5)
     score = clf.score(X_test, y_test)
-    print(score)
+    # print(score)
     predict = clf.predict(X_train)
-    # print(predict)
-    # print(y_train)
-    # print(scores)
-    print(clf.score(X_test, y_test))
     return clf
 
 def get_action(array):
     global handle
     for index, x in np.ndenumerate(array):
-        # print(index, x)
         if handle == 0:
             if x == 1:
                 handle = 1
@@ -113,13 +102,6 @@ if __name__ == '__main__':
     training_data = load_data(args.training)
     train_X, train_Y = process(training_data)
     trader = Trader(train_X, train_Y)
-    
-    # testing_data = load_data(args.testing)
-    # test_X, test_Y = process(testing_data)
-    # accuracy = trader.score(test_X, test_Y)
-    # print("acc:" + np.array2string(accuracy))
-    # predicted = trader.predict(test_X)
-    # print(predicted)
 
     handle = 0
     file = open(args.output, 'w', newline='')
@@ -128,19 +110,14 @@ if __name__ == '__main__':
     during = len(test_data)
     for index, row in test_data.iterrows():
             # We will perform your action as the open price in the next day.
-            # print(index)
             if index == during - 1:
                 break
             row = row.reshape((1,4))
-            # print(row)
             column_names = ['open','high','low','close']
             row = pd.DataFrame(row, columns = column_names)
-            # print(row)
             test = process_test(row)
-            # print(test)
             result = trader.predict(test)
             action = get_action(result)
             data = [action]
-            # print(data)
             csvCursor.writerow(data)
     file.close()
