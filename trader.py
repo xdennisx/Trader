@@ -5,7 +5,6 @@ import numpy as np
 import csv
 from sklearn import cross_validation
 from sklearn import svm
-import matplotlib.pyplot as plt
 from sklearn.multiclass import OneVsOneClassifier
 from sklearn.svm import LinearSVC
 
